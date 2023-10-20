@@ -3,43 +3,56 @@ import { StreamChat } from "stream-chat";
 import {
   Channel,
   ChannelHeader,
+  ChannelList,
   Chat,
+  LoadingIndicator,
   MessageInput,
   MessageList,
   Thread,
   Window,
 } from "stream-chat-react";
-
-const userId = "user_2X0U1dDmMRvMnjFCB9SEXgb1Q0n";
-
-const chatClient = StreamChat.getInstance(process.env.NEXT_PUBLIC_STREAM_KEY!);
-
-chatClient.connectUser(
-  {
-    id: userId,
-    name: "재연 박",
-  },
-  //process.env.STREAM_SECRET  + userId => this is the token
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidXNlcl8yWDBVMWREbU1Sdk1uakZDQjlTRVhnYjFRMG4ifQ.psuC_A9LY0xZIwmudovPBOM6HrH3XOZqNPBCBrFmJ80"
-);
-
-const channel = chatClient.channel("messaging", "channel_1", {
-  name: "Channel #1",
-  members: [userId],
-});
+import useInitializeChatClient from "@/app/chat/useInitializeChatClient";
+import { useUser } from "@clerk/nextjs";
+import MenuBar from "@/app/chat/MenuBar";
 
 export default function ChatPage() {
+  const chatClient = useInitializeChatClient();
+  const { user } = useUser();
+
+  if (!chatClient || !user) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <LoadingIndicator size={40} />
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className="h-screen">
       <Chat client={chatClient}>
-        <Channel channel={channel}>
-          <Window>
-            <ChannelHeader />
-            <MessageList />
-            <MessageInput />
-          </Window>
-          <Thread />
-        </Channel>
+        <div className="flex h-full flex-row">
+          <div className="w-full max-w-[360px]">
+            <MenuBar />
+            <ChannelList
+              filters={{
+                type: "messaging",
+                members: { $in: [user.id] },
+              }}
+              sort={{ last_message_at: -1 }}
+              options={{ state: true, presence: true, limit: 10 }}
+            />
+          </div>
+          <div className="h-full w-full">
+            <Channel>
+              <Window>
+                <ChannelHeader />
+                <MessageList />
+                <MessageInput />
+              </Window>
+              <Thread />
+            </Channel>
+          </div>
+        </div>
       </Chat>
     </div>
   );
