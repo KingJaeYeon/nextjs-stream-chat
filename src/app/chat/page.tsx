@@ -34,8 +34,8 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="bg-gary-100 x1:px-20 x1:py-8 h-screen">
-      <div className="m-auto h-full min-w-[350px] max-w-[1600px] shadow-sm">
+    <div className="h-screen bg-gray-100 xl:px-20 xl:py-8">
+      <div className="m-auto flex h-full min-w-[350px] max-w-[1600px] flex-col shadow-sm">
         <Chat client={chatClient}>
           <div className="flex justify-center border-b border-b-[#DBDDE1] p-3 md:hidden">
             <button onClick={() => setChatSidebarOpen((x) => !x)}>
