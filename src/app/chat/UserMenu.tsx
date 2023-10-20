@@ -23,6 +23,13 @@ export default function UserMenu({
 
   const [users, setUsers] = useState<UserResponse[]>();
 
+  const [moreUsersLoading, setMoreUsersLoading] = useState(false);
+
+  const [endOfPaginationReached, setEndOfPaginationReached] =
+    useState<boolean>(false);
+
+  const pageSize = 2;
+
   useEffect(() => {
     async function loadInitialUsers() {
       try {
