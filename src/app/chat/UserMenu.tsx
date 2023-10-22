@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { UserResource } from "@clerk/types";
 import { Channel, UserResponse } from "stream-chat";
 import { ArrowLeft } from "lucide-react";
+import LoadingButton from "@/components/LoadingButton";
 
 interface UsersMenuProps {
   loggedInUser: UserResource;
@@ -28,7 +29,7 @@ export default function UserMenu({
   const [endOfPaginationReached, setEndOfPaginationReached] =
     useState<boolean>(false);
 
-  const pageSize = 2;
+  const pageSize = 10;
 
   useEffect(() => {
     async function loadInitialUsers() {
@@ -37,17 +38,44 @@ export default function UserMenu({
           {
             id: { $ne: loggedInUser.id },
           },
-          { id: 1 }
+          { id: 1 },
+          { limit: pageSize + 1 }
         );
-        setUsers(response.users);
+        setUsers(response.users.slice(0, pageSize));
+        setEndOfPaginationReached(response.users.length <= pageSize);
       } catch (e) {
         console.log(e);
         alert("Error loading users ");
       }
     }
-
     loadInitialUsers();
   }, [client, loggedInUser.id]);
+
+  async function loadMoreUsers() {
+    setMoreUsersLoading(true);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    try {
+      const lastUserId = users?.[users?.length - 1].id;
+      if (!lastUserId) return;
+
+      const response = await client.queryUsers(
+        {
+          $and: [{ id: { $ne: loggedInUser.id } }, { id: { $gt: lastUserId } }],
+        },
+        { id: 1 },
+        { limit: pageSize + 1 }
+      );
+      setUsers([...users, ...response.users.slice(0, pageSize)]);
+      setEndOfPaginationReached(response.users.length <= pageSize);
+    } catch (error) {
+      console.log(error);
+      alert("Error loading users ");
+    } finally {
+      setMoreUsersLoading(false);
+    }
+  }
 
   function handleChannelSelected(channel: Channel) {
     setActiveChannel(channel);
@@ -81,6 +109,15 @@ export default function UserMenu({
             key={user.id}
           />
         ))}
+        {!endOfPaginationReached && (
+          <LoadingButton
+            onClick={loadMoreUsers}
+            className="m-auto mb-3 w-[80%]"
+            loading={moreUsersLoading}
+          >
+            Load more users
+          </LoadingButton>
+        )}
       </div>
     </div>
   );
