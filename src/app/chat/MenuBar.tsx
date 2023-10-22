@@ -1,5 +1,6 @@
 import { UserButton } from "@clerk/nextjs";
-import { Users } from "lucide-react";
+import { Moon, Sun, Users } from "lucide-react";
+import { useTheme } from "@/app/ThemeProvider";
 
 interface MenuBarProps {
   onUserMenuClick: () => void;
@@ -13,7 +14,26 @@ export default function MenuBar({ onUserMenuClick }: MenuBarProps) {
         <span title="show users">
           <Users className="cursor-pointer" onClick={onUserMenuClick} />
         </span>
+        <ThemeToggleButton />
       </div>
     </div>
+  );
+}
+
+function ThemeToggleButton() {
+  const { theme, setTheme } = useTheme();
+
+  if (theme === "dark") {
+    return (
+      <span title="Enable light theme">
+        <Moon className="cursor-pointer" onClick={() => setTheme("light")} />
+      </span>
+    );
+  }
+
+  return (
+    <span title="Enable dark theme">
+      <Sun className="cursor-pointer" onClick={() => setTheme("dark")} />
+    </span>
   );
 }
