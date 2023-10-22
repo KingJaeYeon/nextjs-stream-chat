@@ -1,5 +1,9 @@
-// // @ts-check
-//
+// @ts-check
+
+self.addEventListener("push", () => {
+  console.log("Push received");
+});
+
 // /// <reference no-default-lib="true"/>
 // /// <reference lib="esnext" />
 // /// <reference lib="webworker" />
